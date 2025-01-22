@@ -213,11 +213,14 @@ app.get("/api/users", async (req: express.Request, res: express.Response) => {
 app.post("/api/users", async (req: express.Request, res: express.Response) => {
   const { name, email, role } = req.body;
   try {
+    // Hash the default password
+    const hashedPassword = await bcrypt.hash("Test@123", 10);
+
     const result = await pool.query(
-      `INSERT INTO users (name, email, role) 
-       VALUES ($1, $2, $3) 
+      `INSERT INTO users (name, email, role, password) 
+       VALUES ($1, $2, $3, $4) 
        RETURNING *`,
-      [name, email, role]
+      [name, email, role, hashedPassword]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
